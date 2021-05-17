@@ -8,13 +8,15 @@ import {
 } from "draft-js";
 import Button from "react-bootstrap/Button";
 
+export const DEFAULT_SECONDS = 5;
+
 export class TextEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       editorState: EditorState.createEmpty(),
       time: {},
-      seconds: 5,
+      seconds: DEFAULT_SECONDS,
       topic: "",
     };
     this.timer = 0;
@@ -33,7 +35,7 @@ export class TextEditor extends React.Component {
       this.setState(
         {
           editorState: EditorState.createEmpty(),
-          seconds: 5,
+          seconds: DEFAULT_SECONDS,
           topic: newProps.data.topic,
         },
         function () {
@@ -165,10 +167,15 @@ export class TextEditor extends React.Component {
     this.props.addTopic(topic);
   };
 
+  handleBeforeInput = (chars, state) => {
+    if (state.seconds === 0) return "handled";
+  };
+
   render() {
     const { editorState } = this.state;
     const timerState = this.state.seconds === 0;
     const ideaView = this.props.data.ideas.length > 0;
+    const isStart = this.state.seconds === DEFAULT_SECONDS;
 
     if (!ideaView)
       return (
@@ -201,6 +208,10 @@ export class TextEditor extends React.Component {
               editorState={editorState}
               onChange={this.onChange}
               handleKeyCommand={this.handleKeyCommand}
+              handleBeforeInput={(chars) =>
+                this.handleBeforeInput(chars, this.state)
+              }
+              readOnly={isStart}
               ref="editor"
             />
           </div>
